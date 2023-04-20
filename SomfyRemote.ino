@@ -1,5 +1,6 @@
 #include <EEPROM.h>
 #include <EEPROMRollingCodeStorage.h>
+#define DEBUG
 #include <SomfyRemote.h>
 
 #include <AceButton.h>
@@ -9,7 +10,7 @@ using namespace ace_button;
 #define EEPROM_ADDRESS 0
 #define REMOTE 0x5184c8
 
-#define DEBUG
+
 
 EEPROMRollingCodeStorage rollingCodeStorage(EEPROM_ADDRESS);
 SomfyRemote somfyRemote(EMITTER_GPIO, REMOTE, &rollingCodeStorage);
@@ -73,7 +74,7 @@ void setup() {
 
 void loop() {
   button1.check();
-  //button2.check();
+  button2.check();
 	if (Serial.available() > 0) {
 		const String string = Serial.readStringUntil('\n');
 		const Command command = getSomfyCommand(string);
@@ -113,26 +114,31 @@ void handleEvent(AceButton* button, uint8_t eventType, uint8_t buttonState) {
     case AceButton::kEventDoubleClicked:
       if (button->getPin() == BUTTON1_PIN) {
         Serial.println(F("Button 1 DoubleClicked!"));
-        const String string = "Prog";
-		    const Command command = getSomfyCommand(string);
-		    somfyRemote.sendCommand(command);
+        somfyRemote.sendCommand(Command::Prog, 4);
+      }
+      if (button->getPin() == BUTTON2_PIN) {
+        Serial.println(F("Button 2 DoubleClicked!"));
+        somfyRemote.sendCommand(Command::My, 4);
       }
       break;
     case AceButton::kEventLongPressed:
       if (button->getPin() == BUTTON1_PIN) {
         Serial.println(F("Button 1 LongPressed!"));
-        const String string = "MyUp";
-		    const Command command = getSomfyCommand(string);
-		    somfyRemote.sendCommand(command);        
+        somfyRemote.sendCommand(Command::MyUp, 4);       
+      }
+      if (button->getPin() == BUTTON2_PIN) {
+        Serial.println(F("Button 2 LongPressed!"));
+        somfyRemote.sendCommand(Command::MyDown, 4);       
       }
       break;                
     case AceButton::kEventClicked:
       if (button->getPin() == BUTTON2_PIN) {
         Serial.println(F("Button 2 clicked!"));
+        somfyRemote.sendCommand(Command::Down, 4);
       }
       if (button->getPin() == BUTTON1_PIN) {
         Serial.println(F("Button 1 Clicked!"));
-		    somfyRemote.sendCommand(Command::Up, 15);        
+		    somfyRemote.sendCommand(Command::Up, 4);        
       }
       break;
   }
